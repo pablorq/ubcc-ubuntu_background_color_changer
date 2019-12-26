@@ -1,0 +1,298 @@
+#!/bin/bash
+# UBCC - Ubuntu Background Color Changer
+#
+#
+# Created:	25/12/2019
+# Author:		PabloRQ
+#
+# Modified:	25/12/2019
+#
+
+
+MODE1="Color Picker"
+MODE2="Choose Theme"
+MODE3="Manual Entry"
+MODE4="EXIT Without Changes"
+COLOR_HEX=""
+FILE_GNOME="/usr/share/gnome-shell/theme/gdm3.css"
+FILE_GRUB="/usr/share/plymouth/themes/default.grub"
+FILE_LOGO="/usr/share/plymouth/themes/ubuntu-logo/ubuntu-logo.script"
+UBCC_LOG=""
+UBCC_LOG_FILE="ubcc-logfile.log"
+
+while true; do
+
+  if [[ "${#COLOR_HEX}" = 0 ]]; then
+    MODE5="No color selected"
+  else
+    MODE5="APPLY the color: $COLOR_HEX"
+  fi
+
+  MODE=$(zenity --list --hide-column 2 \
+  --title "UBUNTU Background Color Changer" \
+  --text "Change UBUNTU Background Color\nfrom boot to login screen\n" \
+  --width 400 \
+  --height 300 \
+  --radiolist \
+  --column "" --column "" --column "Select an option" \
+  FALSE "1" "$MODE1" \
+  FALSE "2" "$MODE2" \
+  FALSE "3" "$MODE3" \
+  FALSE "4" "$MODE4" \
+  FALSE "5" "$MODE5" \
+  );
+
+
+  # Exit?
+  if [[ $? != 0 ]] || [[ "$MODE" = "4" ]]; then
+    # echo "EXIT NOW!"
+  	exit;
+  fi
+
+  # Do stuff
+  case $MODE in
+
+    1)
+    # Color Picker
+    # COLOR_PICKER=`zenity --color-selection --show-palette`
+    COLOR_PICKER=$(zenity --color-selection \
+    --title "UBUNTU Background Color Changer" \
+    --text "Select a color\n" \
+    --show-palette \
+    );
+
+    # Convert RGB to HEX
+    # Split RGB
+    COLOR_RGB=`echo "$COLOR_PICKER" | sed 's/.*(\(.*\))/\1/'`
+    COLOR_ARRAY=(${COLOR_RGB//,/ })
+    # RGB to HEX
+    COLOR_R_HEX=00`printf "%x\n" ${COLOR_ARRAY[0]}`
+    COLOR_G_HEX=00`printf "%x\n" ${COLOR_ARRAY[1]}`
+    COLOR_B_HEX=00`printf "%x\n" ${COLOR_ARRAY[2]}`
+    # To uppercase
+    COLOR_R_HEX=`echo ${COLOR_R_HEX: -2} | tr '[:lower:]' '[:upper:]'`	# Force uppercase
+    COLOR_G_HEX=`echo ${COLOR_G_HEX: -2} | tr '[:lower:]' '[:upper:]'`	# Force uppercase
+    COLOR_B_HEX=`echo ${COLOR_B_HEX: -2} | tr '[:lower:]' '[:upper:]'`	# Force uppercase
+    # Define HEX
+    COLOR_HEX=#$COLOR_R_HEX$COLOR_G_HEX$COLOR_B_HEX
+    ;;
+
+    2)
+    # Choose Theme
+
+    # Ubuntu Colors: from https://design.ubuntu.com/brand/colour-palette/
+    # Yaru Colors: https://github.com/Jannomag/Yaru-Colors
+    THEME01_COLOR="#4F194C"
+    THEME01_NAME="Default Ubuntu 19.10 - Yaru"
+    THEME02_COLOR="#E95420"
+    THEME02_NAME="Ubuntu orange"
+    THEME03_COLOR="#FFFFFF"
+    THEME03_NAME="White"
+    THEME04_COLOR="#000000"
+    THEME04_NAME="Black"
+    THEME05_COLOR="#77216F"
+    THEME05_NAME="Ubuntu Light aubergine"
+    THEME06_COLOR="#5E2750"
+    THEME06_NAME="Ubuntu Mid aubergine"
+    THEME07_COLOR="#2C001E"
+    THEME07_NAME="Ubuntu Dark aubergine"
+    THEME08_COLOR="#AEA79F"
+    THEME08_NAME="Ubuntu Warm grey"
+    THEME09_COLOR="#333333"
+    THEME09_NAME="Ubuntu Cool grey"
+    THEME10_COLOR="#E95420"
+    THEME10_NAME="Yaru Orange Base"
+    THEME11_COLOR="#41C6C8"
+    THEME11_NAME="Yaru Orange Aqua"
+    THEME12_COLOR="#208FE9"
+    THEME12_NAME="Yaru Orange Blue"
+    THEME13_COLOR="#995640"
+    THEME13_NAME="Yaru Orange Brown"
+    THEME14_COLOR="#25469D"
+    THEME14_NAME="Yaru Orange Deepblue"
+    THEME15_COLOR="#3EB34F"
+    THEME15_NAME="Yaru Orange Green"
+    THEME16_COLOR="#9C9C9C"
+    THEME16_NAME="Yaru Orange Grey"
+    THEME17_COLOR="#78AB50"
+    THEME17_NAME="Yaru Orange Mate"
+    THEME18_COLOR="#E920A3"
+    THEME18_NAME="Yaru Orange Pink"
+    THEME19_COLOR="#A064D8"
+    THEME19_NAME="Yaru Orange Purple"
+    THEME20_COLOR="#E92020"
+    THEME20_NAME="Yaru Orange Red"
+    THEME21_COLOR="#E9BA20"
+    THEME21_NAME="Yaru Orange Yellow"
+    THEME22_COLOR="#762572"
+    THEME22_NAME="Yaru Purple Base"
+    THEME23_COLOR="#326868"
+    THEME23_NAME="Yaru Purple Aqua"
+    THEME24_COLOR="#255074"
+    THEME24_NAME="Yaru Purple Blue"
+    THEME25_COLOR="#462E1B"
+    THEME25_NAME="Yaru Purple Brown"
+    THEME26_COLOR="#1A318B"
+    THEME26_NAME="Yaru Purple Deepblue"
+    THEME27_COLOR="#123D18"
+    THEME27_NAME="Yaru Purple Green"
+    THEME28_COLOR="#4D4D4D"
+    THEME28_NAME="Yaru Purple Grey"
+    THEME29_COLOR="#4F6326"
+    THEME29_NAME="Yaru Purple Mate"
+    THEME30_COLOR="#742558"
+    THEME30_NAME="Yaru Purple Pink"
+    THEME31_COLOR="#4C1F7A"
+    THEME31_NAME="Yaru Purple Purple"
+    THEME32_COLOR="#742525"
+    THEME32_NAME="Yaru Purple Red"
+    THEME33_COLOR="#746225"
+    THEME33_NAME="Yaru Purple Yellow"
+
+
+    THEME=$(zenity --list \
+    --title "UBUNTU Background Color Changer" \
+    --text "Select color from a theme\n" \
+    --width 400 \
+    --height 600 \
+    --radiolist \
+    --column "" --column "" --column "Select an option" \
+    FALSE "$THEME01_COLOR" "$THEME01_NAME" \
+    FALSE "$THEME02_COLOR" "$THEME02_NAME" \
+    FALSE "$THEME03_COLOR" "$THEME03_NAME" \
+    FALSE "$THEME04_COLOR" "$THEME04_NAME" \
+    FALSE "$THEME05_COLOR" "$THEME05_NAME" \
+    FALSE "$THEME06_COLOR" "$THEME06_NAME" \
+    FALSE "$THEME07_COLOR" "$THEME07_NAME" \
+    FALSE "$THEME08_COLOR" "$THEME08_NAME" \
+    FALSE "$THEME09_COLOR" "$THEME09_NAME" \
+    FALSE "$THEME10_COLOR" "$THEME10_NAME" \
+    FALSE "$THEME11_COLOR" "$THEME11_NAME" \
+    FALSE "$THEME12_COLOR" "$THEME12_NAME" \
+    FALSE "$THEME13_COLOR" "$THEME13_NAME" \
+    FALSE "$THEME14_COLOR" "$THEME14_NAME" \
+    FALSE "$THEME15_COLOR" "$THEME15_NAME" \
+    FALSE "$THEME16_COLOR" "$THEME16_NAME" \
+    FALSE "$THEME17_COLOR" "$THEME17_NAME" \
+    FALSE "$THEME18_COLOR" "$THEME18_NAME" \
+    FALSE "$THEME19_COLOR" "$THEME19_NAME" \
+    FALSE "$THEME20_COLOR" "$THEME20_NAME" \
+    FALSE "$THEME21_COLOR" "$THEME21_NAME" \
+    FALSE "$THEME22_COLOR" "$THEME22_NAME" \
+    FALSE "$THEME23_COLOR" "$THEME23_NAME" \
+    FALSE "$THEME24_COLOR" "$THEME24_NAME" \
+    FALSE "$THEME25_COLOR" "$THEME25_NAME" \
+    FALSE "$THEME26_COLOR" "$THEME26_NAME" \
+    FALSE "$THEME27_COLOR" "$THEME27_NAME" \
+    FALSE "$THEME28_COLOR" "$THEME28_NAME" \
+    FALSE "$THEME29_COLOR" "$THEME29_NAME" \
+    FALSE "$THEME30_COLOR" "$THEME30_NAME" \
+    FALSE "$THEME31_COLOR" "$THEME31_NAME" \
+    FALSE "$THEME32_COLOR" "$THEME32_NAME" \
+    FALSE "$THEME33_COLOR" "$THEME33_NAME" \
+    );
+    COLOR_HEX=$THEME
+    ;;
+
+    3)
+    # Manual Entry
+    MANUAL=$(zenity --entry \
+    --title "UBUNTU Background Color Changer" \
+    --text "Enter a Hex Color (start with #)\n" \
+    --width 400 \
+    --height 200 \
+    --entry-text "#"
+    );
+    # Check starting #
+    if [[ "${MANUAL: 0:1}" != "#" ]]; then
+      MANUAL="#$MANUAL"
+    fi
+    # Check length
+    if [[ "${#MANUAL}" != 7 ]]; then
+      MANUAL=""
+    fi
+    # Check valid HEX
+    COLOR_HEX=`echo $MANUAL | tr '[:lower:]' '[:upper:]'`	# Force uppercase
+    HEX_R=`echo $COLOR_HEX | cut -c2-3`
+    HEX_G=`echo $COLOR_HEX | cut -c4-5`
+    HEX_B=`echo $COLOR_HEX | cut -c6-7`
+    COLOR_R=$((16#$HEX_R))
+    COLOR_G=$((16#$HEX_G))
+    COLOR_B=$((16#$HEX_B))
+    if [[ "${#COLOR_R}" = 0 ]] || [[ "${#COLOR_G}" = 0 ]] || [[ "${#COLOR_B}" = 0 ]]; then
+      COLOR_HEX=""
+    fi
+    ;;
+
+  5)
+  # Apply changes
+  if [[ "${#COLOR_HEX}" != 0 ]]; then
+    COLOR_HEX=`echo $COLOR_HEX | tr '[:lower:]' '[:upper:]'`	# Force uppercase
+    HEX_R=`echo $COLOR_HEX | cut -c2-3`
+    HEX_G=`echo $COLOR_HEX | cut -c4-5`
+    HEX_B=`echo $COLOR_HEX | cut -c6-7`
+    COLOR_R=$((16#$HEX_R))
+    COLOR_G=$((16#$HEX_G))
+    COLOR_B=$((16#$HEX_B))
+    COLOR_RGB=$COLOR_R,$COLOR_G,$COLOR_B
+    # Convert RGB to RGB/256
+    COLOR_R256=`awk "BEGIN {print $COLOR_R/256}"`
+    COLOR_G256=`awk "BEGIN {print $COLOR_G/256}"`
+    COLOR_B256=`awk "BEGIN {print $COLOR_B/256}"`
+    COLOR_RGB256="$COLOR_R256, $COLOR_G256, $COLOR_B256"
+
+    # Ask for password
+    PASS=$(zenity --password \
+    --title "UBUNTU Background Color Changer" \
+    --text "Type ROOT password\n" \
+    --width 400 \
+    --height 200 \
+    );
+
+    # Backup files
+    UBCC_LOG="$UBCC_LOG-Backup $FILE_GNOME\n"
+    OUT01=$( { echo $PASS | sudo -S cp "$FILE_GNOME" "$FILE_GNOME.ubuntu"; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$OUT01\n\n"
+    UBCC_LOG="$UBCC_LOG-Backup $FILE_GRUB\n"
+    OUT02=$( { echo $PASS | sudo -S cp "$FILE_GRUB" "$FILE_GRUB.ubuntu"; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$OUT02\n\n"
+    UBCC_LOG="$UBCC_LOG-Backup $FILE_LOGO\n"
+    OUT03=$( { echo $PASS | sudo -S cp "$FILE_LOGO" "$FILE_LOGO.ubuntu"; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$OUT03\n\n"
+
+    # Change file 01
+    UBCC_LOG="$UBCC_LOG-Modify $FILE_GNOME\n"
+    ERROR01=$( { echo $PASS | sudo -S sed -i "/#lockDialogGroup *{/,/}/{s/\(background: *\)#.\{6\}/\1$COLOR_HEX/}" "$FILE_GNOME"; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$ERROR01\n\n"
+
+    # Change file 02
+    UBCC_LOG="$UBCC_LOG-Modify $FILE_GRUB\n"
+    ERROR02A=$( { echo $PASS | sudo -S sed -i "/if /{s/\(background_color *\).*;/\1$COLOR_RGB,0;/}" "$FILE_GRUB"; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$ERROR02A\n\n"
+    UBCC_LOG="$UBCC_LOG-Update GRUB\n"
+    ERROR02B=$( { echo $PASS | sudo -S update-grub; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$ERROR02B\n\n"
+
+    # Change file 03
+    UBCC_LOG="$UBCC_LOG-Backup $FILE_LOGO\n"
+    ERROR03A=$( { echo $PASS | sudo -S sed -i "/Window.SetBackgroundTopColor */{s/\((.*\));/($COLOR_RGB256);/}" "$FILE_LOGO"; } 2>&1 )
+    ERROR03B=$( { echo $PASS | sudo -S sed -i "/Window.SetBackgroundBottomColor */{s/\((.*\));/($COLOR_RGB256);/}" "$FILE_LOGO"; } 2>&1 )
+    UBCC_LOG="$UBCC_LOG$ERROR03A\n"
+    UBCC_LOG="$UBCC_LOG$ERROR03B\n\n"
+
+    echo -e "$UBCC_LOG" > $UBCC_LOG_FILE
+
+    PASS=$(zenity --text-info \
+    --title "UBUNTU Background Color Changer" \
+    --width 600 \
+    --height 600 \
+    --filename $UBCC_LOG_FILE \
+    );
+
+    exit;
+  fi
+  ;;
+
+  esac
+
+done
