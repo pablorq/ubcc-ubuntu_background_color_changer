@@ -22,4 +22,5 @@ You can see a log of the actions done, and also a log file is created next to ub
 
 ## How it works
 To change the background color is necessary to change 3 different files with 3 different color codes and also update grub to applythe changes to boot screen.
+The background color is configured for grub boot screen, plymouth screen with Ubuntu logo and Gnome shell login screen.
 The app also makes a backup of your files before to be modified.
